@@ -12,24 +12,9 @@ def measure(func):
             return func(*args, **kwargs)
         finally:
             end_ = int(round(time() * 1000)) - start
-            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} ms")
+            print(f"{func.__name__}  execution time: {end_ if end_ > 0 else 0} ms")
 
     return _time_it
-
-
-def combination_index_list(n):
-    list_n = []
-    if n == 0:
-        return [(0,)]
-    else:
-        list_minus_one = combination_index_list(n - 1)
-        list_n.extend(list_minus_one)
-        for combination in list_minus_one:
-            combination_format_list = list(combination)
-            combination_format_list.append(n)
-            list_n.append(tuple(combination_format_list))
-        list_n.append((n,))
-        return list_n
 
 
 def extract_percent(param):
@@ -57,65 +42,45 @@ class Repository:
     def _number_of_equities(self):
         return len(self.equities)
 
-    def _list_of_combination(self):
-        return combination_index_list(self._number_of_equities() - 1)
+    def add_equity(self, equity: "Equity"):
+        self.equities.append(equity)
 
-    def _list_of_combination_with_profit(self):
-        list_of_combination_with_profit = []
-        for combination in self._list_of_combination():
-            list_of_combination_with_profit.append(
-                {
+    def get_equities_sorted_by_percent_cost(self):
+        return sorted(self.equities, key=lambda equity: equity.percent_profit, reverse=True)
+
+    @measure
+    def get_best_combination(self, max_investment):
+        total_profit = 0
+        total_cost = 0
+        combination = []
+        equities = []
+        i = 0
+        equities_sorted = self.get_equities_sorted_by_percent_cost()
+        """
+         {
                     "combination": combination,
                     "equities": self._get_equities_from_index_tuple(combination),
                     "cost": self._get_sum_cost_from_index_tuple(combination),
                     "profit": self._get_sum_profit_from_index_tuple(combination),
                 }
-            )
-        return sorted(
-            list_of_combination_with_profit,
-            key=lambda element: element["profit"],
-            reverse=True,
-        )
+        """
+        while i < len(equities_sorted) :
+            new_total_cost = total_cost + equities_sorted[i].cost
+            if new_total_cost <= max_investment:
+                total_cost = new_total_cost
+                total_profit += equities_sorted[i].profit
+                combination.append(i)
+                equities.append(equities_sorted[i])
+            i += 1
 
-    def _get_equities_from_index_tuple(self, index_tuple):
-        return tuple(
-            [
-                equity
-                for equity in self.equities
-                if self.equities.index(equity) in index_tuple
-            ]
-        )
-
-    def _get_sum_profit_from_index_tuple(self, index_tuple):
-        return sum(
-            [
-                equity.profit
-                for equity in self.equities
-                if self.equities.index(equity) in index_tuple
-            ]
-        )
-
-    def _get_sum_cost_from_index_tuple(self, index_tuple):
-        return sum(
-            [
-                equity.cost
-                for equity in self.equities
-                if self.equities.index(equity) in index_tuple
-            ]
-        )
-
-    def add_equity(self, equity: "Equity"):
-        self.equities.append(equity)
-
-    @measure
-    def get_best_combination_by_brute_force(self, max_investment):
-        for item in self._list_of_combination_with_profit():
-            if item["cost"] <= max_investment:
-                return item
-        return False
+        return {"combination": tuple(combination),
+                "equities": tuple(equities),
+                "cost": total_cost,
+                "profit": total_profit}
 
 
 class App:
+
     def __init__(self):
         self.actions_repository = Repository()
 
@@ -157,8 +122,8 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    app.populate_equities_with_csv("equities.csv")
-    result = app.actions_repository.get_best_combination_by_brute_force(500)
+    app.populate_equities_with_csv("dataset1_Python+P7.csv")
+    result = app.actions_repository.get_best_combination(500)
     print(
         f"{result['equities']}: for profit of {result['profit']} from cost {result['cost']} "
     )
