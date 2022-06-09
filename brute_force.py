@@ -1,20 +1,19 @@
 # is brute force O(e)
 import csv
-from functools import wraps
-from time import time
+from time import perf_counter
 
 
 def measure(func):
-    @wraps(func)
-    def _time_it(*args, **kwargs):
-        start = int(round(time() * 1000))
+
+    def wrapper(*args, **kwargs):
+        start = perf_counter()
         try:
             return func(*args, **kwargs)
         finally:
-            end_ = int(round(time() * 1000)) - start
-            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} ms")
+            end_ = perf_counter() - start
+            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} s")
 
-    return _time_it
+    return wrapper
 
 
 def combination_index_list(n):
