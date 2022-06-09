@@ -11,8 +11,8 @@ def measure(func):
         try:
             return func(*args, **kwargs)
         finally:
-            end_ = int(round(time() * 1000)) - start
-            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} ms")
+            end_ =  perf_counter() - start
+            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} s")
 
     return wrapper
 
@@ -48,6 +48,7 @@ class Repository:
             result = combinations(self.equities, r=i + 1)
             for r in result:
                 equities_combinations.append(r)
+        print('il y a ', len(equities_combinations), 'combinations')
         return equities_combinations
 
     def _list_of_combination_with_profit(self):
