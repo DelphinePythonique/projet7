@@ -38,29 +38,25 @@ class Repository:
         self.equities = []
 
     def _list_of_combination(self):
-        equities_combinations = []
+        list_of_combination_with_sum= []
         for i in range(len(self.equities)):
-            result_ = combinations(self.equities, r=i + 1)
-            for r in result_:
-                equities_combinations.append(r)
-        print("il y a ", len(equities_combinations), "combinations")
-        return equities_combinations
+            combinations_ = combinations(self.equities, r=i + 1)
+            for combination in combinations_:
+                list_of_combination_with_sum.append(self._populate_sum_combination(combination))
+        print("il y a ", len(list_of_combination_with_sum), "combinations")
+        return sorted(
+            list_of_combination_with_sum,
+            key=lambda element: element["profit"],
+            reverse=True,
+        )
 
-    def _list_of_combination_with_profit(self):
-        list_of_combination_with_profit = []
-        for combination in self._list_of_combination():
-            list_of_combination_with_profit.append(
-                {
+    def _populate_sum_combination(self, combination):
+
+        return  {
                     "equities": combination,
                     "cost": self._get_sum_cost(combination),
                     "profit": self._get_sum_profit(combination),
                 }
-            )
-        return sorted(
-            list_of_combination_with_profit,
-            key=lambda element: element["profit"],
-            reverse=True,
-        )
 
     def _get_sum_profit(self, combination):
         return sum([equity.profit for equity in combination])
@@ -73,7 +69,7 @@ class Repository:
 
     @measure
     def get_best_combination_by_brute_force(self, max_investment):
-        for item in self._list_of_combination_with_profit():
+        for item in self._list_of_combination():
             if item["cost"] <= max_investment:
                 return item
         return False
