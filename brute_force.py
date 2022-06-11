@@ -1,17 +1,15 @@
-# is brute force O(e)
 import csv
 from time import perf_counter
 from itertools import combinations
 
 
 def measure(func):
-
     def wrapper(*args, **kwargs):
         start = perf_counter()
         try:
             return func(*args, **kwargs)
         finally:
-            end_ =  perf_counter() - start
+            end_ = perf_counter() - start
             print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} s")
 
     return wrapper
@@ -22,7 +20,7 @@ def extract_percent(param):
 
 
 class Equity:
-    def __init__(self, name: "string", cost: "float", percent_profit: "float"):
+    def __init__(self, name: "str", cost: "float", percent_profit: "float"):
         self.name = name
         self.cost = cost
         self.percent_profit = percent_profit
@@ -39,16 +37,13 @@ class Repository:
     def __init__(self):
         self.equities = []
 
-    def _number_of_equities(self):
-        return len(self.equities)
-
     def _list_of_combination(self):
         equities_combinations = []
         for i in range(len(self.equities)):
-            result = combinations(self.equities, r=i + 1)
-            for r in result:
+            result_ = combinations(self.equities, r=i + 1)
+            for r in result_:
                 equities_combinations.append(r)
-        print('il y a ', len(equities_combinations), 'combinations')
+        print("il y a ", len(equities_combinations), "combinations")
         return equities_combinations
 
     def _list_of_combination_with_profit(self):
@@ -67,22 +62,11 @@ class Repository:
             reverse=True,
         )
 
-
     def _get_sum_profit(self, combination):
-        return sum(
-            [
-                equity.profit
-                for equity in combination
-            ]
-        )
+        return sum([equity.profit for equity in combination])
 
     def _get_sum_cost(self, combination):
-        return sum(
-             [
-                equity.cost
-                for equity in combination
-             ]
-        )
+        return sum([equity.cost for equity in combination])
 
     def add_equity(self, equity: "Equity"):
         self.equities.append(equity)

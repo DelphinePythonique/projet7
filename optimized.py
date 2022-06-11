@@ -1,26 +1,26 @@
 # is brute force O(e)
 import csv
-from functools import wraps
-from time import time
+from time import perf_counter
 
 
 def measure(func):
-    @wraps(func)
-    def _time_it(*args, **kwargs):
-        start = int(round(time() * 1000))
+    def wrapper(*args, **kwargs):
+        start = perf_counter()
         try:
             return func(*args, **kwargs)
         finally:
-            end_ = int(round(time() * 1000)) - start
-            print(f"{func.__name__}  execution time: {end_ if end_ > 0 else 0} ms")
+            end_ = perf_counter() - start
+            print(f"{func.__name__}  execution time: {end_ if end_ >0 else 0} s")
 
-    return _time_it
+    return wrapper
 
-def profit_to_percent(cost,profit):
+
+def profit_to_percent(cost, profit):
     if cost == 0:
         return 0
     else:
-        return (100*profit/cost)
+        return 100 * profit / cost
+
 
 def extract_percent(param):
     return float(param.split("%")[0])
@@ -49,12 +49,12 @@ class Repository:
         with open(csv_enquiries, newline="") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                self.actions_repository.add_equity(
+              self.add_equity(
                     Equity(
                         row["action"],
                         float(row["cost"]),
                         extract_percent(row["percent"]),
-                        len(self.equities)
+                        len(self.equities),
                     )
                 )
 
@@ -62,13 +62,13 @@ class Repository:
         with open(csv_enquiries, newline="") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                if float(row["price"])>0:
+                if float(row["price"]) > 0:
                     self.add_equity(
                         Equity(
                             row["name"],
                             float(row["price"]),
                             float(row["profit"]),
-                            len(self.equities)
+                            len(self.equities),
                         )
                     )
 
@@ -79,24 +79,18 @@ class Repository:
         self.equities.append(equity)
 
     def get_equities_sorted(self, key):
-        return sorted(self.equities, key=lambda equity: getattr(equity, key), reverse=True)
+        return sorted(
+            self.equities, key=lambda equity: getattr(equity, key), reverse=True
+        )
 
     @measure
     def get_best_combination(self, max_investment, sorted_key):
         total_profit = 0
         total_cost = 0
-        combination = []
         equities = []
         i = 0
         equities_sorted = self.get_equities_sorted(sorted_key)
-        """
-         {
-                    "combination": combination,
-                    "equities": self._get_equities_from_index_tuple(combination),
-                    "cost": self._get_sum_cost_from_index_tuple(combination),
-                    "profit": self._get_sum_profit_from_index_tuple(combination),
-                }
-        """
+
         while i < len(equities_sorted):
             new_total_cost = total_cost + equities_sorted[i].cost
             if new_total_cost <= max_investment:
@@ -105,40 +99,59 @@ class Repository:
                 equities.append(equities_sorted[i])
             i += 1
 
-        return {"equities": tuple(equities),
-                "cost": total_cost,
-                "profit": total_profit}
+        return {"equities": tuple(equities), "cost": total_cost, "profit": total_profit}
+
 
 class App:
-
     def __init__(self):
         self.actions_repository = Repository()
 
+
 if __name__ == "__main__":
     app = App()
-    app.actions_repository.populate_equities_with_csv_old("dataset2_Python+P7.csv")
+    app.actions_repository.populate_equities_with_csv_old("dataset1_Python+P7.csv")
+    print('there are ', len(app.actions_repository.equities), 'equities')
     result = app.actions_repository.get_best_combination(500, "percent_profit")
-    print(f"solution by percent_profit for profit of {result['profit']} from cost {result['cost']} ")
+    print(
+        f"solution by percent_profit for profit of {result['profit']} from cost {result['cost']} "
+    )
 
     print(f"name, id,cost, .percent_profit,profit")
-    print("\n".join([f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}" for equities in result['equities']]))
-
+    print(
+        "\n".join(
+            [
+                f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}"
+                for equities in result["equities"]
+            ]
+        )
+    )
 
     result = app.actions_repository.get_best_combination(500, "cost")
-    print(f":solution by cost: for profit of {result['profit']} from cost {result['cost']} ")
+    print(
+        f":solution by cost: for profit of {result['profit']} from cost {result['cost']} "
+    )
 
     print(f"name, id,cost, .percent_profit,profit")
-    print("\n".join(
-        [f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}" for equities
-         in result['equities']]))
-
+    print(
+        "\n".join(
+            [
+                f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}"
+                for equities in result["equities"]
+            ]
+        )
+    )
 
     result = app.actions_repository.get_best_combination(500, "profit")
-    print(f": solution by profit for profit of {result['profit']} from cost {result['cost']} ")
-
+    print(
+        f": solution by profit for profit of {result['profit']} from cost {result['cost']} "
+    )
 
     print(f"name, id,cost, .percent_profit,profit")
-    print("\n".join(
-        [f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}" for equities
-         in result['equities']]))
-
+    print(
+        "\n".join(
+            [
+                f"{equities.name}, {equities.id}, {equities.cost}, {equities.percent_profit}, {equities.profit}"
+                for equities in result["equities"]
+            ]
+        )
+    )
